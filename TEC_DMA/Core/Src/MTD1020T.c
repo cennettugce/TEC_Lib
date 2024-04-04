@@ -28,7 +28,7 @@ uint8_t r_actual_curr[7] = "A?\n";
 uint8_t r_actual_vol[7] = "U?\n";
 uint8_t s_set_temp[8] = "T35000\n";
 uint8_t r_set_temp[7] = "T?\n";
-//uint8_t r_actual_T[4] = "Te?\n";
+uint8_t r_actual_T[4] = "Te?\n";
 uint8_t s_settempw[7] = "W100\n";
 uint8_t r_tempw[7] = "W?\n";
 uint8_t s_delay[7] = "d10\n";
@@ -93,42 +93,30 @@ void MTD_Disable (void)
 	HAL_GPIO_WritePin(MTD_EN_PORT, MTD_EN_PIN, GPIO_PIN_SET);
 }
 
-uint8_t MTD_ReadParam (uint8_t *t_data, uint16_t t_Size, uint16_t r_Size)
-{
-	uint8_t prevRx[RxBuf_SIZE] ;
-	memcpy ((uint8_t *)prevRx, (uint8_t *)RxBuf, RxBuf_SIZE);
 
-	HAL_UART_Transmit_DMA(&UART, t_data, t_Size);
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, RxBuf , r_Size);
-
-	memcpy ((uint8_t *)MainBuf, (uint8_t *)RxBuf, r_Size);
-	uint8_t currRx[RxBuf_SIZE];
-	memcpy ((uint8_t *)currRx, (uint8_t *)RxBuf, RxBuf_SIZE);
-	memset(RxBuf, '\0', RxBuf_SIZE);
-	if ( prevRx == currRx){
-		return 0;
-	}else{
-		return 1;
-	}
+void MTD_r_SetTemp(uint8_t *r_data){
+	HAL_UART_Transmit_DMA(&UART, r_set_temp, strlen((const char*)r_set_temp));
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , 6);
 }
 
-uint8_t MTD_WriteParam(uint8_t *r_data, uint16_t r_Size)
-{
-	HAL_UART_Transmit_DMA(&UART, r_data, r_Size);
-	return 1;
+void MTD_r_ActualTemp(uint8_t *r_data){
+	HAL_UART_Transmit_DMA(&UART, r_actual_T, strlen((const char*)r_actual_T));
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , 6);
 }
+
 
 void MTD_Reset (void)
 {
 	HAL_UART_Transmit_DMA(&UART, reset, strlen((const char*)reset));
 }
 
-uint8_t checkError(void)
+uint8_t checkError( uint8_t *r_data, uint16_t r_Size)
 {
 
-	MTD_ReadParam (error, strlen((const char*)error),2);
+	HAL_UART_Transmit_DMA(&UART, error, strlen((const char*)error));
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , r_Size);
 
-    switch ((int)RxBuf) {
+    switch ((int)r_data) {
         case 1:
             printf("Enable pin not set to L");
             return 16;
@@ -171,3 +159,32 @@ uint8_t checkError(void)
     }
 
 }
+
+/*
+uint8_t MTD_ReadParam (uint8_t *t_data, uint16_t t_Size, uint8_t *r_data, uint16_t r_Size)
+{
+	uint8_t prevRx[RxBuf_SIZE] ;
+	memcpy ((uint8_t *)prevRx, (uint8_t *)RxBuf, RxBuf_SIZE);
+
+	HAL_UART_Transmit_DMA(&UART, t_data, t_Size);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , r_Size);
+
+	memcpy ((uint8_t *)MainBuf, (uint8_t *)r_data, r_Size);
+	uint8_t currRx[r_Size];
+	memcpy ((uint8_t *)currRx, (uint8_t *)r_data, r_Size);
+	//memset(RxBuf, '\0', r_Size);
+	return 0;
+	if ( prevRx == currRx){
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+uint8_t MTD_WriteParam(uint8_t *r_data, uint16_t r_Size)
+{
+	HAL_UART_Transmit_DMA(&UART, r_data, r_Size);
+	return 1;
+}
+*/
+

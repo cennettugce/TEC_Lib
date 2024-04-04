@@ -70,9 +70,10 @@ DMA_HandleTypeDef hdma_usart2_tx;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
-uint8_t r_actual_T[4] = "Te?\n";
+
 
 uint8_t rx[15];
+uint8_t rx2[15];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,6 +128,7 @@ int main(void)
   MX_ETH_Init();
   /* USER CODE BEGIN 2 */
   MTD_Init();
+ //TEC TEC;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -134,7 +136,10 @@ int main(void)
   while (1)
   {
 	//  HAL_UART_Transmit_DMA(&huart2, r_actual_T,4);
-	  MTD_ReadParam (r_actual_T, 4, 6);
+	  MTD_r_ActualTemp(rx2 );
+
+
+
 	  //HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx, 10);
 
 
