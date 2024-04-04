@@ -83,38 +83,58 @@ void MTD_Init (void)
 	 MTD_Enable();
 }
 
+/**
+  * @brief Enables the MTD1020T.
+  */
 void MTD_Enable (void)
 {
 	HAL_GPIO_WritePin(MTD_EN_PORT, MTD_EN_PIN, GPIO_PIN_RESET);
 }
 
+/**
+  * @brief Disables the MTD1020T.
+  */
 void MTD_Disable (void)
 {
 	HAL_GPIO_WritePin(MTD_EN_PORT, MTD_EN_PIN, GPIO_PIN_SET);
 }
 
-
+/**
+  * @brief Receive the set temperature.
+  * @param r_data pointer to data buffer (u8 element)
+  */
 void MTD_r_SetTemp(uint8_t *r_data){
 	HAL_UART_Transmit_DMA(&UART, r_set_temp, strlen((const char*)r_set_temp));
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , 6);
 }
 
+/**
+  * @brief Receive the actual temperature.
+  * @param r_data pointer to data buffer (u8 element)
+  */
 void MTD_r_ActualTemp(uint8_t *r_data){
 	HAL_UART_Transmit_DMA(&UART, r_actual_T, strlen((const char*)r_actual_T));
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , 6);
 }
 
-
+/**
+  * @brief Resets the error register.
+  */
 void MTD_Reset (void)
 {
 	HAL_UART_Transmit_DMA(&UART, reset, strlen((const char*)reset));
 }
 
-uint8_t checkError( uint8_t *r_data, uint16_t r_Size)
+/**
+  * @brief Reads the error register and prints the error message corresponding to the error code.
+  * @param r_data pointer to data buffer (u8 element)
+  * @retval error code (u8)
+  */
+uint8_t checkError( uint8_t *r_data)
 {
 
 	HAL_UART_Transmit_DMA(&UART, error, strlen((const char*)error));
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , r_Size);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart2, r_data , 3);
 
     switch ((int)r_data) {
         case 1:
